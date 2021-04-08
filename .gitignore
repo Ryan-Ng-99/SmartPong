@@ -1,32 +1,160 @@
-# Prerequisites
-*.d
+#include "thingProperties.h"
+#define echoPin 2 // attach pin D2 Arduino to pin Echo of HC-SR04
+#define trigPin 3 //attach pin D3 Arduino to pin Trig of HC-SR04
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+// defines variables
+long duration; // variable for the duration of sound wave travel
+int distance; // variable for the distance measurement
 
-# Precompiled Headers
-*.gch
-*.pch
+int IRSensor1 = 0; // connect ir sensor1 to arduino pin 0
+int red_LED1 = 6; // red led
+int green_LED1 = 4;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+int IRSensor2 = 10; // connect ir sensor6 to arduino pin 0
+int red_LED2 = 7; // red led
+int green_LED2 = 8;
 
-# Fortran module files
-*.mod
-*.smod
+int IRSensor3 = 14; // connect ir sensor10 to arduino pin 0
+int red_LED3 = 1; // red led
+int green_LED3 = 5;
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+void setup() {
+  //ULTRASONIC SENSOR
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
+  pinMode(echoPin, INPUT); // Sets the echoPin as an INPUT
+  Serial.begin(9600); // // Serial Communication is starting with 9600 of baudrate speed
+  Serial.println("Ultrasonic Sensor HC-SR04 Test"); // print some text in Serial Monitor
+  Serial.println("with Arduino UNO R3");
+  
+  pinMode (IRSensor1, INPUT); // sensor pin INPUT
+  pinMode (red_LED1, OUTPUT); // Led pin OUTPUT
+  pinMode (green_LED1, OUTPUT); // Led pin OUTPUT
+  
+  pinMode (IRSensor2, INPUT); // sensor pin INPUT
+  pinMode (red_LED2, OUTPUT); // Led pin OUTPUT
+  pinMode (green_LED2, OUTPUT); // Led pin OUTPUT
+  
+   pinMode (IRSensor3, INPUT); // sensor pin INPUT
+  pinMode (red_LED3, OUTPUT); // Led pin OUTPUT
+  pinMode (green_LED3, OUTPUT); // Led pin OUTPUT
+  
+  
+    // Defined in thingProperties.h
+  initProperties();
 
-# Executables
-*.exe
-*.out
-*.app
+  // Connect to Arduino IoT Cloud
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+    setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+   
+}
+void loop() {
+    ArduinoCloud.update();
+    
+  //ULTRASONIC SENSOR  
+  // Clears the trigPin condition
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
+  // Displays the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  if (distance < 10){
+  distance_meter = true;
+  digitalWrite(red_LED1, LOW);
+  digitalWrite(green_LED1, LOW);
+  digitalWrite(red_LED2, LOW);
+  digitalWrite(green_LED2, LOW);
+  digitalWrite(red_LED3, LOW);
+  digitalWrite(green_LED3, LOW);
+    
+  delay(250);
+  digitalWrite(red_LED1, HIGH);
+  digitalWrite(green_LED1, LOW);
+  digitalWrite(red_LED2, HIGH);
+  digitalWrite(green_LED2, LOW);
+  digitalWrite(red_LED3, HIGH);
+  digitalWrite(green_LED3,LOW);
+  delay(250);
+  }
+  else{
+  distance_meter=false;
+  //RGB LED 1
+  int statusSensor1 = digitalRead(IRSensor1);
+  Serial.print("Sensor1: ");
+  Serial.println(statusSensor1);
+  if (statusSensor1 == 1){
+    digitalWrite(red_LED1, LOW);
+    digitalWrite(green_LED1, HIGH);
+    cup1 = true;
+  }
+  
+  else
+  {
+    digitalWrite(red_LED1, HIGH);
+    digitalWrite(green_LED1, LOW);
+    cup1 = false;
+  }
+  
+  //RGB LED 2
+  int statusSensor2 = digitalRead(IRSensor2);
+  Serial.print("Sensor2: ");
+  Serial.println(statusSensor2);
+  if (statusSensor2 == 1){
+    digitalWrite(red_LED2, LOW);
+    digitalWrite(green_LED2, HIGH);
+    cup2 = true;
+  }
+  
+  else
+  {
+    digitalWrite(red_LED2, HIGH);
+    digitalWrite(green_LED2, LOW);
+    cup2 = false;
+  }
+  
+  //RGB LED 3
+  int statusSensor3 = digitalRead(IRSensor3);
+  Serial.print("Sensor3: ");
+  Serial.println(statusSensor3);
+  if (statusSensor3 == 1){
+    digitalWrite(red_LED3, LOW);
+    digitalWrite(green_LED3, HIGH);
+    cup3 = true;
+  }
+  else
+  {
+    digitalWrite(red_LED3, HIGH);
+    digitalWrite(green_LED3, LOW);
+    cup3 = false;
+  }
+  
+  if(statusSensor1 == 0 && statusSensor2 == 0 && statusSensor3 == 0){
+    digitalWrite(red_LED1, LOW);
+  digitalWrite(green_LED1, LOW);
+  digitalWrite(red_LED2, LOW);
+  digitalWrite(green_LED2, LOW);
+  digitalWrite(red_LED3, LOW);
+  digitalWrite(green_LED3, LOW);
+    
+  delay(250);
+  digitalWrite(red_LED1, LOW);
+  digitalWrite(green_LED1, HIGH);
+  digitalWrite(red_LED2, LOW);
+  digitalWrite(green_LED2, HIGH);
+  digitalWrite(red_LED3, LOW);
+  digitalWrite(green_LED3,HIGH);
+  delay(250);
+  }  
+  } 
+}
+
